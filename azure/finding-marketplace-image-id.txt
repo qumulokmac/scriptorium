@@ -1,0 +1,5 @@
+  az vm image list-publishers --location westus --output table | grep -i nvid
+  az vm image list-offers --location westus --publisher nvidia --output table
+  az vm image list-skus --location westus2 --publisher nvidia --offer nvidia-gpu-optimized-vmi-a10 --output table
+  az vm image list --location westus2 --publisher nvidia --offer nvidia-gpu-optimized-vmi-a10 --sku nvidia_base_a10_vmi_22_08_gen2 --all --output table
+  az vm image show --location westus2 --urn nvidia:nvidia-gpu-optimized-vmi-a10:nvidia_base_a10_vmi_22_08_gen2:22.08.8 --output json

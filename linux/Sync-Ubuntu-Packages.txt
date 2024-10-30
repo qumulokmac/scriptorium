@@ -1,0 +1,56 @@
+Sync-Ubuntu-Packages.txt
+
+###
+# Be sure to update first 
+###
+sudo apt update
+
+###
+# On source server
+###
+dpkg --get-selections > installed_packages-list-2404.txt
+
+###
+# Copy the file to all target servers
+###
+scp installed_packages-list-2404.txt user@target-server:/tmp/
+
+###
+# Set Package Selections:
+# 
+###
+sudo dpkg --set-selections < /root/installed_packages-list-2404.txt
+
+###
+# Note:  If you have a warning that says "found unknown packages" run:  
+###
+sudo apt-get install dselect && sudo dselect update
+
+# Then run this again: 
+sudo dpkg --set-selections < /root/installed_packages-list-2404.txt
+
+###
+# Install Packages
+###
+sudo apt-get dselect-upgrade -y
+
+exit 
+
+
+Another for the 22_04 servers:
+
+sudo apt update
+On a physical 22_04 server:  	dpkg --get-selections > ubuntu2204-package-list.txt
+								scp ubuntu2204-package-list.txt sut6621-vm2:/root
+
+On the new virtual machine:		sudo dpkg --set-selections <  ubuntu2204-package-list.txt
+								sudo apt-get install dselect && sudo dselect update
+								sudo apt-get -y -u dselect-upgrade
+
+Then run the userdata4physicals.sh  # (Lots of security settings and such)
+
+reboot 
+
+
+
+

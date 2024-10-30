@@ -1,0 +1,24 @@
+Installing and configuring NGINX
+
+###
+# Prereqs 
+###
+	sudo apt -y update
+	sudo apt -y install nginx
+
+	sudo systemctl start nginx
+	sudo systemctl enable nginx
+
+
+###
+# Move content 
+###
+# Copy/move your ISO file to the default web directory:
+
+	sudo mv /path/to/your/iso/usb_factory_reset.iso /var/www/html/
+
+###
+# Test access: 
+###
+	curl -r 0-1023 http://10.10.66.121/usb_factory_reset.iso -o /dev/null
+

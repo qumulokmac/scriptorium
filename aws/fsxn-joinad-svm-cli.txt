@@ -1,0 +1,1 @@
+To join the SVM to AD: https://docs.aws.amazon.com/fsx/latest/ONTAPGuide/manage-svm-ad-config-ontap-cli.html 

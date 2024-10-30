@@ -1,0 +1,8 @@
+# Start logging
+Start-Transcript -Path "C:\custom_data_log.txt" -Append
+
+# Write a test message
+Write-Output "Custom script executed successfully" | Out-File -FilePath "C:\custom_data_log.txt" -Append
+
+# End logging
+Stop-Transcript

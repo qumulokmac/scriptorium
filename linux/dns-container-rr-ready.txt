@@ -1,0 +1,106 @@
+
+# Note: Best to run on the Maestro server, not a worker node
+
+#############################################################################
+# Create a docker network
+#############################################################################
+sudo docker network create --subnet=10.44.2.0/23 qumulo-net
+
+#############################################################################
+# Configure named.conf.options (ns's should be the assigned azure DNS servers.  Use:   sudo systemd-resolve --status )
+#############################################################################
+
+options {
+    directory "/var/cache/bind";
+
+    recursion yes;
+    listen-on { any; };
+
+    forwarders {
+            168.63.129.16;
+    };
+};
+
+#############################################################################
+#  Define the zone for qumulo.net in named.conf.local
+#############################################################################
+
+zone "qumulo.net" {
+    type master;
+    file /etc/bind/zones/db.qumulo.net;
+};
+
+#############################################################################
+#  Create the zone config for qumulo.net (/etc/bind/zones/db.qumulo.net)
+#############################################################################
+
+$TTL    0
+@       IN      SOA     ns1.qumulo.net. root.qumulo.net. (
+                 42     ; Serial
+             604800     ; Refresh
+              86400     ; Retry
+            2419200     ; Expire
+             604800 )   ; Negative Cache TTL
+;
+; name servers - NS records
+     IN      NS      ns1.qumulo.net.
+
+; name servers - A records
+ns1.qumulo.net.          IN      A       10.44.2.200
+
+cluster.qumulo.net.       IN      A      10.44.0.4
+cluster.qumulo.net.       IN      A      10.44.0.5
+cluster.qumulo.net.       IN      A      10.44.0.6
+cluster.qumulo.net.       IN      A      10.44.0.7
+
+#############################################################################
+#  Configure the docker image Dockerfile
+#############################################################################
+
+FROM ubuntu:bionic
+
+RUN apt-get update \
+  && apt-get install -y \
+  bind9 \
+  bind9utils \
+  bind9-doc \ 
+  dnsutils \
+  iputils-ping \
+  vim
+
+# Enable IPv4
+RUN sed -i 's/OPTIONS=.*/OPTIONS="-4 -u bind"/' /etc/default/bind9
+
+# Copy configuration files
+COPY named.conf.options /etc/bind/
+COPY named.conf.local /etc/bind/
+COPY db.qumulo.net /etc/bind/zones/
+
+# Run eternal loop
+CMD ["/bin/bash", "-c", "while :; do sleep 10; done"]
+
+
+#############################################################################
+#  Execution 
+#############################################################################
+
+
+# Build the docker image: 
+sudo docker build -t qdns .
+
+# Run the container 
+sudo docker run -d --rm --name=qdns --net=qumulo-net --ip=10.44.2.200 qdns
+
+# enable the DNS server
+$ sudo docker exec -d dns-server /etc/init.d/bind9 start
+
+
+# Log into the container in a bash shell: 
+sudo docker exec -it 90f2023bd622 bash
+
+
+# trying this for external comm: 
+sudo docker run -d --rm --name=qdns --net=qumulo-net --ip=10.44.2.200 -p 53:53 qdns
+
+
+

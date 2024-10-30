@@ -1,0 +1,10 @@
+
+# From https://docs.aws.amazon.com/fsx/latest/ONTAPGuide/managing-volume-file-capacity.html#increase-max-files
+
+# Ontap increase indeed limit: 
+# Stuck at 21,251,126
+ssh fsxadmin@172.31.17.38
+set adv
+volume modify -vserver svmkdd -volume minivol -files-set-maximum true
+volume modify -vserver svmkdd -volume minivol -files 300000000
+

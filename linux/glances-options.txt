@@ -1,0 +1,159 @@
+
+
+Trying to determine when the AI_IMAGE PHASES start and end. 
+
+
+The average oprate fell below the threshold of 95.00% (94.47%)for workload AI_SF
+The workload variance between AI_CP and AI_SF exceeded the threshold of+/- 5.00% (5.53%)
+The workload variance between AI_SF and AI_TF exceeded the threshold of+/- 5.00% (5.86%)
+The workload variance between AI_SF and AI_TR exceeded the threshold of+/- 5.00% (5.87%)
+
+<Lambda>
+
+	Contributing workloads:
+
+	AI_SF          Procs  144   Ops/sec 14400.5  Avg Latency      0.710
+	AI_TF          Procs   72   Ops/sec   144.3  Avg Latency      3.331
+	AI_TR          Procs  360   Ops/sec  1081.2  Avg Latency      2.330
+	AI_CP          Procs   36   Ops/sec    36.1  Avg Latency      4.539
+	
+
+
+
+	glances --diskio-iops 
+
+
+	qumulo@spec-4nL16c-0:~$ glances --modules-list
+Plugins list: alert, amps, cloud, connections, core, cpu, diskio, docker, folders, fs, gpu, help, ip, irq, load, mem, memswap, network, now, percpu, ports, processcount, processlist, psutilversion, quicklook, raid, sensors, smart, system, uptime, wifi
+Exporters list: cassandra, couchdb, csv, elasticsearch, graph, influxdb, json, kafka, mqtt, opentsdb, prometheus, rabbitmq, restful, riemann, statsd, zeromq
+qumulo@spec-4nL16c-0:~$ glances --modules-list
+
+       --enable-plugin PLUGIN
+              enable PLUGIN (comma separated list)
+
+       -2, --disable-left-sidebar
+
+
+
+       ENTER  Set the process filter
+
+              NOTE:
+                 On macOS please use CTRL-H to delete filter.
+
+              Filter is a regular expression pattern:
+
+              • gnome: matches all processes starting with the gnome string
+
+              • .*gnome.*: matches all processes containing the gnome string
+
+       a      Sort process list automatically
+
+              • If CPU >70%, sort processes by CPU usage
+
+              • If MEM >70%, sort processes by MEM usage
+
+              • If CPU iowait >60%, sort processes by I/O read and write
+
+       A      Enable/disable Application Monitoring Process
+
+       b      Switch between bit/s or Byte/s for network I/O
+
+       B      View disk I/O counters per second
+
+       c      Sort processes by CPU usage
+
+       d      Show/hide disk I/O stats
+
+       D      Enable/disable Docker stats
+
+       e      Enable/disable top extended stats
+
+       E      Erase current process filter
+
+       f      Show/hide file system and folder monitoring stats
+
+       F      Switch between file system used and free space
+
+       g      Generate graphs for current history
+
+       h      Show/hide the help screen
+
+
+       i      Sort processes by I/O rate
+
+       I      Show/hide IP module
+
+       k      Show/hide TCP connections
+
+       l      Show/hide log messages
+
+       m      Sort processes by MEM usage
+
+       M      Reset processes summary min/max
+
+       n      Show/hide network stats
+
+       N      Show/hide current time
+
+       p      Sort processes by name
+
+       q|ESC|CTRL-C
+              Quit the current Glances session
+
+       Q      Show/hide IRQ module
+
+       r      Reset history
+
+       R      Show/hide RAID plugin
+
+       s      Show/hide sensors stats
+
+       t      Sort process by CPU times (TIME+)
+
+       T      View network I/O as combination
+
+       u      Sort processes by USER
+
+       U      View cumulative network I/O
+
+       w      Delete finished warning log messages
+
+       W      Show/hide Wifi module
+
+       x      Delete finished warning and critical log messages
+
+       z      Show/hide processes stats
+
+      0      Enable/disable Irix/Solaris mode
+
+              Task’s CPU usage will be divided by the total number of CPUs
+
+       1      Switch between global CPU and per-CPU stats
+
+       2      Enable/disable left sidebar
+
+       3      Enable/disable the quick look module
+
+       4      Enable/disable all but quick look and load module
+
+       5      Enable/disable top menu (QuickLook, CPU, MEM, SWAP and LOAD)
+
+       6      Enable/disable mean GPU mode
+
+       /      Switch between process command line or command name
+
+       In the Glances client browser (accessible through the --browser command line argument):
+
+       ENTER  Run the selected server
+
+       UP     Up in the servers list
+
+       DOWN   Down in the servers list
+
+       q|ESC  Quit Glances
+
+                 A template is available in the /usr{,/local}/share/doc/glances (Unix-like) directory or directly on GitHub.
+
+                        You can put your own glances.conf file in the following locations:
+
+                                                                        │Linux, SunOS │ ~/.config/glances, /etc/glances                        │

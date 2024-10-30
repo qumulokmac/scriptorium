@@ -1,0 +1,33 @@
+
+WSL for Server 2019 
+
+###
+# Install the optional feature for WSL (Requires a reboot)
+###
+Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
+
+###
+# Enable WSL 
+###
+dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+
+###
+# Download Ubuntu
+###
+Invoke-Webrequest -Uri https://aka.ms/wslubuntu2204 -OutFile .\Ubuntu2204.appx -UseBasicParsing
+
+###
+# Extract the platform version 
+###
+1- Rename the appx to zip 
+2- Extract the archive for your platform 
+	(I Used Ubuntu_2204.1.7.0_x64.appx)
+3- Extract the contents of your appx to the location you want the install to be
+
+###
+# Install Ubuntu
+###
+Run ubuntu.exe in the extracted folder. This will install the distribution. Dont move the folder location. 
+
+
+

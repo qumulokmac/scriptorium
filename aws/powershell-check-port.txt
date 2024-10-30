@@ -1,0 +1,2 @@
+Test-NetConnectioni -ComputerName 10.1.2.3 -Port 6379
+

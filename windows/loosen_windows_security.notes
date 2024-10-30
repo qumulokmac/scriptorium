@@ -1,0 +1,17 @@
+
+Here are the notes for loosening security on the windows image so it can be used for benchmarking.
+
+1/ Disabled FW:
+	Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
+2/ Configure WSman to trust all
+	Set-Item WSMan:\localhost\Client\TrustedHosts -Value '*'
+3/ Uninstalled Microsoft Defender
+	Set-MpPreference -DisableRealtimeMonitoring $true
+	Uninstall-WindowsCapability -Online -Name 'Microsoft-Windows-Defender'" 
+I also tested setting the CredSSP client/server roles but ended up abandoning that route. Sharing in case you come across this
+	Enable-WSManCredSSP -Role "Client" -DelegateComputer '*'
+	Enable-WSManCredSSP -Role "Server"
+
+
+and there is this:  Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Force 
+

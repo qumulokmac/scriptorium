@@ -1,0 +1,21 @@
+FsxId093ccd2782b16e158::> set -privilege adv
+
+Warning: These advanced commands are potentially dangerous; use them only when directed to do so by NetApp personnel.
+Do you want to continue? {y|n}: y
+
+FsxId093ccd2782b16e158::*> volume conversion start -vserver FSxN-SVM-001 -volume volconv -check-only true
+Conversion of volume "volconv" in Vserver "FSxN-SVM-001" to a FlexGroup can proceed with the following warnings:
+* After the volume is converted to a FlexGroup, it will not be possible to change it back to a flexible volume.
+* The volume is nearly out of available space. Converting this volume to a FlexGroup might lead to "No space left on device" errors.
+* It is recommended that the size of volume "volconv" in Vserver "FSxN-SVM-001" be at least "100GB" for optimal performance.
+* Converting the volume to a FlexGroup will not add additional resources for capacity. After converting, use the "volume expand" command to add resources.
+
+
+FsxId093ccd2782b16e158::*> volume conversion start -vserver FSxN-SVM-001 -volume volconv
+
+Warning: * After the volume is converted to a FlexGroup, it will not be possible to change it back to a flexible volume.
+         * The volume is nearly out of available space. Converting this volume to a FlexGroup might lead to "No space left on device" errors.
+         * It is recommended that the size of volume "volconv" in Vserver "FSxN-SVM-001" be at least "100GB" for optimal performance.
+         * Converting the volume to a FlexGroup will not add additional resources for capacity. After converting, use the "volume expand" command to add resources.
+Do you want to continue? {y|n}: y
+[Job 671] Job succeeded: success

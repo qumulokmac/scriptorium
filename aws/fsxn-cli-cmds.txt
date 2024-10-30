@@ -1,0 +1,9 @@
+
+# Checking if NTLM is configured 
+cifs security show -vserver SVMNAME -fields session-security-for-ad-ldap
+
+setting the share level permissions: 
+vserver cifs share access-control create -vserver fsxontapsvm04 -share datavol -user-group-type windows -user-or-group “Windows_domain_name\group_name” -permission
+
+
+

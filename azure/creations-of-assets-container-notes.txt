@@ -1,0 +1,56 @@
+
+Tomorrow: 
+
+- TEST THIS ONE:  In smbbench-fio.zip
+	- It could be an error in scripting/extracting logic
+
+- In smb_bench.zip - remove the FIO directory
+	I seem to be missing the latest scripts in ~qumulo/scripts
+	Recreate the zip file once you clean this up.  
+	Update cygwin with the position location of 1,35 
+
+	CHECK in userdata container! Or create a new container for these files. 
+	Create a zip file for all software that needs installed
+		Pros: Faster, helps with successful installs through consistency, and removes dependencies on external websites
+		Con: will need to be updated occasioanlly 
+
+- Figure out how to pin to the taskbar ... anf fucking IE
+
+- MS Updates didnt work 
+
+- Implement folder mounting... thats the plan
+		Pros: 	removes dependencies on limited drive letters and allows for more than 22 node testing
+		Cons:	Unproven technology, requires research
+
+Update the smbbench repo with the new terraform, scripts, etc. 
+
+
+-------------------------------------------------------------------------------------------------------------------------
+
+Backups: 
+
+Name                                  LastModified
+----                                  ------------
+smb_bench.zip                         2024-05-16T18:27:15+00:00
+smbbench-20240516-rng.tgz             2024-05-17T01:09:50+00:00
+smbbench-20240516-normal.tgz          2024-05-17T02:32:17+00:00
+smb_bench-20240518.zip                2024-05-18T13:55:03+00:00
+smb_bench-20240518-22-drives.zip      2024-05-18T19:09:10+00:00
+smbbench-nerdio-webinar-20240519.zip  2024-05-19T17:48:08+00:00
+smbbench-fio.zip                      2024-05-24T03:47:17+00:00
+
+
+Change everything to use the new tmeresources container:		assets
+
+
+
+
+
+
+
+
+
+
+
+
+

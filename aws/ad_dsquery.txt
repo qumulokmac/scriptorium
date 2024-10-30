@@ -1,0 +1,10 @@
+C:\Users\Admin>dsquery computer
+"CN=WIN-ERDR1UHG5FA,OU=Domain Controllers,DC=frog,DC=example,DC=com"
+"CN=WIN-BK872OEIUBG,OU=Domain Controllers,DC=frog,DC=example,DC=com"
+"CN=AMZNFSXNOZJ04RH,OU=FSx,OU=AWS Reserved,DC=frog,DC=example,DC=com"
+"CN=AMZNFSXOEZL76AK,OU=FSx,OU=AWS Reserved,DC=frog,DC=example,DC=com"
+"CN=amznfsxsh8navb6,OU=FSx,OU=AWS Reserved,DC=frog,DC=example,DC=com"
+"CN=amznfsxepghilgb,OU=FSx,OU=AWS Reserved,DC=frog,DC=example,DC=com"
+"CN=TOAD,OU=Computers,OU=FROG,DC=frog,DC=example,DC=com"
+"CN=SVMFROG,OU=Computers,OU=FROG,DC=frog,DC=example,DC=com"
+

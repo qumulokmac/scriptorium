@@ -1,0 +1,10 @@
+
+
+
+
+
+
+
+iperf3 --server --bind fe80::6eb5:fb0:b193:37cc%enp5s0 --port 8801
+iperf3 --client --bind fe80::ea39:35ff:fe38:ac7c%eno1 --client fe80::6eb5:fb0:b193:37cc%eno1 --port 8801
+

@@ -1,0 +1,23 @@
+fio --name=fiotest --filename=/directory/to/files --size=16Gb --rw=read --bs=8K --direct=1 --numjobs=8 --ioengine=libaio --iodepth=32 --group_reporting --runtime=60 --startdelay=60
+
+[root@localhost ~]# cat jobfile.fio 
+[global]
+name=fiotest
+ioengine=libaio
+direct=1
+iodepth=32
+group_reporting
+runtime=60
+startdelay=60
+
+[random-rw-test1]
+rw=read
+bs=8k
+size=16Gb
+numjobs=8
+filename=/directory/to/files
+
+[root@localhost ~]# fio jobfile.fio 
+
+
+

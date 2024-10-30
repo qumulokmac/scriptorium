@@ -1,0 +1,16 @@
+###
+# From: # https://pariswells.com/blog/research/how-to-telnet-from-a-netapp-to-test-port-availability 
+###
+#Unlock diag user and set password
+
+security login unlock -username diag
+security login password -username diag
+set -privilege advanced
+set diag
+systemshell local
+telnet servername.fully.qualified.com 443  
+
+# Relock Diag Account
+security login unlock -username diag
+
+

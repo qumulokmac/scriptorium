@@ -1,0 +1,20 @@
+!/bin/bash
+cd /fsxl
+
+echo ""
+echo "Getting the max_read_ahead values"
+lctl get_param 'llite.*.max_read_ahead_mb'
+lctl get_param 'llite.*.max_read_ahead_per_file_mb'
+lctl get_param 'llite.*.max_read_ahead_whole_mb'
+
+echo ""
+echo "Setting the max_read_ahead values"
+lctl set_param 'llite.*.max_read_ahead_mb=128'
+lctl set_param 'llite.*.max_read_ahead_per_file_mb=128'
+lctl set_param 'llite.*.max_read_ahead_whole_mb=128'
+
+exit
+lctl dl
+echo "https://docs.aws.amazon.com/fsx/latest/LustreGuide/performance.html#performance-tips"
+lctl list_param -R '*' | grep -vE 'dump|\.req_history$' | xargs lctl get_param
+exit

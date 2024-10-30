@@ -1,0 +1,2 @@
+
+vserver cifs security modify -vserver <vserver> -is-aes-encryption-enabled true

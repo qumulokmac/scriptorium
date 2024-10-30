@@ -1,0 +1,45 @@
+
+
+-->. Secret Qumulo Admin Account to use when needing to be admin over SMD:  "q\admin"
+
+tar cvfh spec_ai_image_test8d_results.tgz logs spec/SPECExecutable/results* spec/SPECExecutable/*AI*
+
+usage: cli ssh [-h] [--catalog-url CATALOG_URL] [--keyhouse-url KEYHOUSE_URL]
+               [--keyhouse-app-registration KEYHOUSE_APP_REGISTRATION] [-s SAAS_SUBSCRIPTION_ID] [-n CLUSTER_NAME]
+               [-u CLUSTER_UUID] [-p PORT]
+               {shell,run,run-on-all,copy-file-to,copy-file-to-all,copy-file-from,copy-dir-to,copy-dir-from} ...
+
+options:
+  -h, --help            show this help message and exit
+  -p PORT, --port PORT  The port corresponding to the target node. When unspecified, chooses the first node it finds in
+                        the catalog. (default: None)
+
+required arguments:
+  --catalog-url CATALOG_URL
+                        The url of the catalog server. (default: ENV.catalog_url (or None))
+  --keyhouse-url KEYHOUSE_URL
+                        The url of the Keyhouse. (default: ENV.keyhouse_url (or None))
+  --keyhouse-app-registration KEYHOUSE_APP_REGISTRATION
+                        The keyhouse app registration for the environment. (default: ENV.keyhouse_app_registration (or
+                        None))
+  -s SAAS_SUBSCRIPTION_ID, --saas-subscription-id SAAS_SUBSCRIPTION_ID
+                        Customer SaaS subscription ID (default: None)
+  -n CLUSTER_NAME, --cluster-name CLUSTER_NAME
+                        Cluster name (default: None)
+  -u CLUSTER_UUID, --cluster-uuid CLUSTER_UUID
+                        Cluster uuid (default: None)
+
+subcommands:
+  {shell,run,run-on-all,copy-file-to,copy-file-to-all,copy-file-from,copy-dir-to,copy-dir-from}
+    shell               Open an SSH shell on the target node.
+    run                 Run a command on the target node.
+    run-on-all          Run a command on the target node.
+    copy-file-to        Copy a local file onto the target node.
+    copy-file-to-all    Copy a local file onto the target node.
+    copy-file-from      Copy a file from the target node to the local machine.
+    copy-dir-to         Copy a directory to the target node to the local machine.
+    copy-dir-from       Copy a directory from the target node to the local machine.
+
+-p XXXXX where node1==22001, node2==22002, etc.
+
+    qaas ssh -u $FSID shell -p 22002

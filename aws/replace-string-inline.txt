@@ -1,0 +1,10 @@
+
+# Make sure you know what you are doing 
+find . -name index.en.md -exec grep nix {} \;
+
+###
+# Below is the command to swap thestrings 
+###
+find . -type f -print -name index.en.md | xargs sed -i {} 's/nix/css/g'
+
+

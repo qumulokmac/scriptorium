@@ -1,0 +1,4 @@
+# aws storagegateway create-smb-file-share --gateway-arn "arn:aws:storagegateway:us-west-2:111111111111:gateway/sgw-11111111"  --authentication GuestAccess --client-token `uuidgen` --location-arn "arn:aws:s3:::bucketnamehere/prefix1/" --role "arn:aws:iam::111111111111:role/aws-service-role/storagegateway.amazonaws.com/AWSServiceRoleForStorageGateway"
+
+
+

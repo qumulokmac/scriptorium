@@ -1,0 +1,24 @@
+ 
+
+Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
+
+Set-Item WSMan:\localhost\Client\TrustedHosts -Value '*' -Force
+
+        
+Enable-WSManCredSSP -Role "Client" -DelegateComputer '*' -Force
+Enable-WSManCredSSP -Role "Server" -Force
+
+Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Force
+
+# Enable WinRM
+Enable-PSRemoting -Force
+
+# Set the WinRM service to start automatically
+Set-Service -Name WinRM -StartupType Automatic
+
+# Allow the source server to connect (replace with the actual IP or hostname of the source server)
+Set-Item -Path WSMan:\localhost\Client\TrustedHosts -Value "source_server_name_or_ip" -Force
+
+# Restart the WinRM service
+Restart-Service -Name WinRM
+ 

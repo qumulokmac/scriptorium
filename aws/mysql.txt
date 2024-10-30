@@ -1,0 +1,7 @@
+###
+# EASY MYSQL CLI connection string works in AWS 
+###
+# mysql -h labdb.c6xoyndmnisp.us-east0.rds.amazonaws.com -u kmacadmin -p  INVENTORY
+Enter password:
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MySQL connection id is 53

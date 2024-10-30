@@ -1,0 +1,2 @@
+workload latency show -iterations 0 -refresh-display true
+

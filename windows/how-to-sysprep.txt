@@ -1,0 +1,11 @@
+
+From: https://learn.microsoft.com/en-us/azure/virtual-machines/generalize#windows
+
+cd %windir%\system32\sysprep
+sysprep.exe /oobe /generalize /shutdown
+
+# Generalize the VM so it can be put in a gallery 
+
+az vm generalize --resource-group mrcoops-rg --name mrcoops-maestro
+
+

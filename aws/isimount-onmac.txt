@@ -1,0 +1,2 @@
+
+ sudo mount -t nfs -o nolocks,resvport,locallocks,vers=3 192.168.42.155:/ifs/stuff/hr /private/nfs

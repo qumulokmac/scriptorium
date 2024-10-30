@@ -1,0 +1,27 @@
+ROBOCOPY only ACLS 
+
+net use S: \\fsx01.ds.example.com\share
+
+robocopy c:\kjmtmp c:\kjmtmp-replica /secfix /e /copy:s /IS /IT 
+
+robocopy c:\SOURCE\SOURCE1 S:\TARGET\SOURCE1 /secfix /e /copy:s /IS /IT 
+
+
+
+ICACLS: 
+icacls "\\<servername>\Information\T-E-S-T" /save C:\ACL_info_file /T
+icacls "\\<servername>\Information" /restore C:\ACL_info_file
+
+ROBOCOPY <Source> <Target> /E /Copy:S /IS /IT 
+Copy option have the following flags to use:
+
+D Data
+A Attributes
+T Time stamps
+S NTFS access control list (ACL)
+O Owner information
+U Auditing information
+The default value for CopyFlags is DAT (data, attributes, and time stamps).
+
+/IS - Includes the same files.
+/IT - Includes "tweaked" files.

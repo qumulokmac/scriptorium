@@ -1,0 +1,20 @@
+
+First download and install FIO from sourceforge.  
+ 
+Here is a command that worked for KMac on Windows 2022R2
+
+    fio.exe --name=test1 --readwrite=read --bs=1m --filename=test-datafile.dat --size=1GB --ioengine=windowsaio  \
+        --runtime=60 --time_based --iodepth=4 --numjobs=32  --eta=always
+
+    Valid values for --readwrite are: 
+                    : read       Sequential read
+                    : write      Sequential write
+                    : trim       Sequential trim
+                    : randread   Random read
+                    : randwrite  Random write
+                    : randtrim   Random trim
+                    : rw         Sequential read and write mix
+                    : readwrite  Sequential read and write mix
+                    : randrw     Random read and write mix
+                    : trimwrite  Trim and write mix, trims preceding writes
+

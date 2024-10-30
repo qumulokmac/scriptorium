@@ -1,0 +1,5 @@
+
+# The following presign command generates a pre-signed URL for  a  speci-
+#        fied bucket and key that is valid for one week:
+
+aws s3 presign s3://awsexamplebucket/test2.txt --expires-in 604800

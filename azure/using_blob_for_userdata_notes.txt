@@ -1,0 +1,79 @@
+########################################################################################################################
+# kmac@qumulo.com
+#
+# Notes on using userdata on Windows in Azure with Terraform
+# 
+# I learned the hard way that the Tte maximum size for the command line in Windows is 8191 characters. 
+# Ie, the userdata has to be less. 
+#
+# New approach: Upload the script to Azure Blob Storage and use the CustomScriptExtension to download and execute it.
+#
+########################################################################################################################
+
+
+
+###
+# Step #1: Upload the script to Azure Blob Storage
+###
+
+az storage blob upload --account-name tmeresources --container-name userdata --name smbbench-custom-data.ps1 --file ./smbbench-custom-data.ps1
+
+###
+# Step #2: Generate a SAS Token for the Blob. Replace <date> with an appropriate expiry date (e.g., 2024-12-31T23:59:59Z).
+###
+
+az storage blob generate-sas --account-name tmeresources --container-name userdata --name smbbench-custom-data.ps1 --permissions r --expiry 2024-12-31T23:59:59Z --output tsv
+
+#  Returned:  se=2024-12-31T23%3A59%3A59Z&sp=r&sv=2022-11-02&sr=b&sig=36CLIUb%2Ff%2FUcn7m0moZlXo%2FPx%2BxfV6K0Bk5zT3ejX5s%3D
+
+###
+# Step #3:	Construct the File URI by putting the SAS Token at the end:
+###
+https://tmeresources.blob.core.windows.net/userdata/smbbench-custom-data.ps1?se=2024-12-31T23%3A59%3A59Z&sp=r&sv=2022-11-02&sr=b&sig=36CLIUb%2Ff%2FUcn7m0moZlXo%2FPx%2BxfV6K0Bk5zT3ejX5s%3D
+
+###
+# Step #4: Update the Terraform Configuration:
+###
+
+resource "azurerm_virtual_machine_extension" "windows_vm_extension" {
+  count                = "${var.num_vms}"
+  name                 = "CustomScriptExtension-${count.index}"
+  virtual_machine_id   = azurerm_windows_virtual_machine.windows_vm[count.index].id
+  publisher            = "Microsoft.Compute"
+  type                 = "CustomScriptExtension"
+  type_handler_version = "1.10"
+
+  settings = <<SETTINGS
+    {
+        "fileUris": ["https://tmeresources.blob.core.windows.net/userdata/smbbench-custom-data.ps1?se=2024-12-31T23%3A59%3A59Z&sp=r&sv=2022-11-02&sr=b&sig=36CLIUb%2Ff%2FUcn7m0moZlXo%2FPx%2BxfV6K0Bk5zT3ejX5s%3D"],
+        "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File smbbench-custom-data.ps1"
+    }
+SETTINGS
+}
+
+
+resource "azurerm_virtual_machine_extension" "maestro_vm_extension" {
+  name                 = "CustomScriptExtension-maestro"
+  virtual_machine_id   = azurerm_windows_virtual_machine.maestro_vm.id
+  publisher            = "Microsoft.Compute"
+  type                 = "CustomScriptExtension"
+  type_handler_version = "1.10"
+
+  settings = <<SETTINGS
+    {
+        "fileUris": ["https://tmeresources.blob.core.windows.net/userdata/smbbench-custom-data.ps1?se=2024-12-31T23%3A59%3A59Z&sp=r&sv=2022-11-02&sr=b&sig=36CLIUb%2Ff%2FUcn7m0moZlXo%2FPx%2BxfV6K0Bk5zT3ejX5s%3D"],
+        "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File smbbench-custom-data.ps1"
+    }
+SETTINGS
+}
+
+
+########################################################################################################################
+FIO upload and such
+
+az storage blob generate-sas --account-name tmeresources --container-name userdata --name smbbench-fio.zip --permissions r --expiry 2024-12-31T23:59:59Z --output tsv
+
+se=2024-12-31T23%3A59%3A59Z&sp=r&sv=2022-11-02&sr=b&sig=i322dDbq9OAOZJvm2T%2BVs5nmPqH99ogY2M2gmjMeRqk%3D
+
+https://tmeresources.blob.core.windows.net/userdata/smbbench-fio.zip?se=2024-12-31T23%3A59%3A59Z&sp=r&sv=2022-11-02&sr=b&sig=i322dDbq9OAOZJvm2T%2BVs5nmPqH99ogY2M2gmjMeRqk%3D
+
