@@ -1,0 +1,31 @@
+#!/bin/bash
+
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+
+if [ -z "$1" ]; then
+    echo "Usage: $0 <file_to_copy>"
+    exit 1
+fi
+
+FILE=$1
+
+if [ ! -f "$FILE" ]; then
+    echo "Error: File '$FILE' does not exist."
+    exit 1
+fi
+
+while IFS= read -r worker; do
+    echo "##########"
+    echo "# $worker:"
+    echo "##########"
+    echo ""
+
+    if scp "$FILE" qumulo@"$worker":"$SCRIPT_DIR/"; then
+        echo "File successfully copied to $worker:$SCRIPT_DIR"
+    else
+        echo "Error: Failed to copy file to $worker"
+    fi
+    echo ""
+
+done < workers.conf
+
