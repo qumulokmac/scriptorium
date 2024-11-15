@@ -22,6 +22,9 @@ MAIN_LOGFILE="${BASEDIR}/main.log"
 DNS_TOTAL_IPS=$(dig +short $CNQ_FQDN | wc -l)
 NPROC_COUNT=$(nproc)
 
+# Ephemeral array that holds unused IP addresses per iteration. 
+declare -a available_ips
+
 mkdir -p ${BASEDIR}/logs
 echo "$(date) - Current working directory: $(pwd)" >> ${MAIN_LOGFILE}
 echo "$(date) - PATH: $PATH" >> ${MAIN_LOGFILE}
@@ -42,28 +45,20 @@ initialize_files() {
     fi
 }
 
-get_first_ip() {
-    local timeout=900
-    local start_time=$(date +%s)
+get_unique_ip() {
+    if [ ${#available_ips[@]} -eq 0 ]; then
+        available_ips=($(dig +short $CNQ_FQDN | shuf))
+    fi
 
-    while true; do
-        local ip_addresses=($(dig +short $CNQ_FQDN))
-        if [ ${#ip_addresses[@]} -gt 0 ]; then
-            echo "${ip_addresses[0]}"
-            return
-        fi
-
-        local current_time=$(date +%s)
-        local elapsed_time=$((current_time - start_time))
-
-        if [ $elapsed_time -ge $timeout ]; then
-            echo "$(date) - Failed to get IP addresses after $timeout seconds. Exiting." >> ${MAIN_LOGFILE}
-            exit 1
-        fi
-
-        echo "$(date) - No IP addresses returned for $CNQ_FQDN. Retrying in 15 seconds..." >> ${MAIN_LOGFILE}
-        sleep 15
-    done
+    if [ ${#available_ips[@]} -gt 0 ]; then
+        local selected_ip="${available_ips[0]}"
+        available_ips=("${available_ips[@]:1}")
+        echo "$selected_ip"
+        return
+    else
+        echo "$(date) - No more unique IPs available for this iteration." >> ${MAIN_LOGFILE}
+        exit 1
+    fi
 }
 
 umount_nfs_exports() {
@@ -90,6 +85,7 @@ umount_nfs_exports() {
         else
             echo "$(date) - $mount_point is not a directory or does not exist. Skipping removal." >> ${MAIN_LOGFILE}
         fi
+
     done
 
     echo "$(date) - Verifying the /mnt directory" >> ${MAIN_LOGFILE}
@@ -119,7 +115,7 @@ mount_nfs_exports() {
     local count=0
     while [ $count -lt $NODE_MOUNT_COUNT ]; do
         local ip
-        ip=$(get_first_ip)
+        ip=$(get_unique_ip)
         echo "$(date) - Using node IP $ip" >> ${MAIN_LOGFILE}
         local MNTPNT
         MNTPNT="/mnt/fio-node-${ip}"
@@ -137,13 +133,13 @@ mount_nfs_exports() {
         sudo chown qumulo:qumulo "$MNTPNT"
         count=$((count + 1))
 
-        # Stop after mounting the required number of mount points
         if [ $count -eq $NODE_MOUNT_COUNT ]; then
             break
         fi
         echo "$count mounts done" >> ${MAIN_LOGFILE}
     done
 }
+
 create_fio_jobfile() {
     local count=1
 
@@ -164,32 +160,6 @@ create_fio_jobfile() {
         count=$((count + 1))
     done
 }
-
-# create_fio_jobfile() {
-#     local count=1
-# 
-#     for mntpnt in $(mount | grep 'type nfs' | awk '{print $3}'); do
-#         local myrand
-#         myrand="${RANDOM}${RANDOM}${RANDOM}"
-#         mkdir -p "${mntpnt}/$myrand"
-# 
-#         #if (( count % 2 == 0 )); then
-#         #    echo "[job${count}_iops]" >> "$FIOJOBFILE"
-#         #else
-#             echo "[job${count}_tput]" >> "$FIOJOBFILE"
-#         #fi
-# 
-#         echo "directory=${mntpnt}/$myrand" >> "$FIOJOBFILE"
-#         echo "numjobs=1" >> "$FIOJOBFILE"
-#         echo "" >> "$FIOJOBFILE"
-# 
-#         if [ $count -eq ${NODE_MOUNT_COUNT} ]; then
-#             break
-#         else
-#             count=$((count + 1))
-#         fi
-#     done
-# }
 
 generate_fio_configs() {
     cat << EOF > "$HERO_IOPS_FILE"
@@ -245,21 +215,6 @@ start_fio() {
     echo "${pids[@]}"
 }
 
-# start_fio() {
-#     local config_file="$1"
-#     local output_file="$2"
-#     local num_jobs="$3"
-# 
-#     echo "$(date) - Starting $num_jobs FIO jobs with config $config_file" >> "$output_file"
-# 
-#     for (( i=0; i<num_jobs; i++ )); do
-#         sudo -u qumulo nohup stdbuf -oL fio "$config_file" >> "$output_file" 2>&1 &
-#         pids+=($!)
-#     done
-# 
-#     echo "${pids[@]}"
-# }
-# 
 check_fio_processes() {
     local pids=("$@")
     local all_done

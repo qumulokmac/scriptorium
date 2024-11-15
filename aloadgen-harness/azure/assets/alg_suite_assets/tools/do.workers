@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+    echo "Usage: $0 <command>"
+    exit 1
+fi
+
+CMD=$1
+
+for worker in `cat ~/workers.conf`
+do
+    echo "##########"
+    echo "# $worker:"
+    echo "##########"
+    echo ""
+
+    ssh qumulo@"$worker" "${CMD}"
+
+done
+
