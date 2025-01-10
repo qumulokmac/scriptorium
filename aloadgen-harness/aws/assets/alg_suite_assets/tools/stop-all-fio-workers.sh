@@ -17,12 +17,12 @@ if [ ! -f "$WORKERS_CONF" ]; then
 fi
 
 echo "Attempting to stop adaptive_load_generator on ALL Ubuntu client..."
-parallel-ssh -h "$WORKERS_CONF" -x '-i ~/keys/grumpquat' -i "sudo pkill -9 -f 'adapt|fio' " 2>&1 | grep -v "[FAILURE]"
+parallel-ssh -h "$WORKERS_CONF" -i "sudo pkill -9 -f 'adapt|fio' " 2>&1 | grep -v "[FAILURE]"
 
 echo "Checking fio processes on all clients..."
 for host in $(cat "$WORKERS_CONF"); do
     echo -n "$host number of fio processes: "
-    if ! ssh -i ~/keys/grumpquat "$host" 'ps -ef | grep fio | grep -v grep | wc -l'; then
+    if ! ssh "$host" 'ps -ef | grep fio | grep -v grep | wc -l'; then
         echo "Error: Failed to check fio processes on $host." >&2
     fi
 done

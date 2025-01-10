@@ -7,7 +7,7 @@
 
 export COPYFILE_DISABLE=true
 
-cd /Users/kmcdonald/git/aloadgen/assets || { echo "Error: Failed to change to directory /Users/kmcdonald/git/aloadgen"; exit 1; }
+cd ~/git/scriptorium/aloadgen-harness/aws/assets || { echo "Error: Failed to change to directory /Users/kmcdonald/git/aloadgen"; exit 1; }
 
 DTS=$(date +%Y%m%d%H)
 if [ $? -ne 0 ]; then
@@ -35,7 +35,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-SIG=$(aws s3 presign s3://bucket-of-bytes/scripts/alg_suite.tgz --expires-in 604800)
+SIG=$(aws s3 presign s3://bucket-of-bytes/scripts/alg_suite.tgz --region us-east-1 --expires-in 604800)
 if [ $? -ne 0 ]; then
     echo "Error: Failed to generate a presigned URL."
     exit 1

@@ -5,11 +5,11 @@
 # Last Updated:   Nov 8th, 2024
 # Author:         kmac@qumulo.com
 #
-# Version:        111424.1915
-# 
+# Version:        111724.1750
+#
 ################################################################################
 
-CNQ_FQDN="cnq.qumulo.net"
+CNQ_FQDN="cnq.speedtest.cloud"
 FIO_RUNTIME=3000
 
 BASEDIR="/home/qumulo"
@@ -22,7 +22,6 @@ MAIN_LOGFILE="${BASEDIR}/main.log"
 DNS_TOTAL_IPS=$(dig +short $CNQ_FQDN | wc -l)
 NPROC_COUNT=$(nproc)
 
-# Ephemeral array that holds unused IP addresses per iteration. 
 declare -a available_ips
 
 mkdir -p ${BASEDIR}/logs
@@ -37,27 +36,10 @@ fi
 
 echo "$(date) - NODE_MOUNT_COUNT set to ${NODE_MOUNT_COUNT}." >> ${MAIN_LOGFILE}
 
-
 initialize_files() {
     if [ -e "$FIOJOBFILE" ]; then
         echo "$(date) - Removing $FIOJOBFILE" >> ${MAIN_LOGFILE}
         rm -f "$FIOJOBFILE"
-    fi
-}
-
-get_unique_ip() {
-    if [ ${#available_ips[@]} -eq 0 ]; then
-        available_ips=($(dig +short $CNQ_FQDN | shuf))
-    fi
-
-    if [ ${#available_ips[@]} -gt 0 ]; then
-        local selected_ip="${available_ips[0]}"
-        available_ips=("${available_ips[@]:1}")
-        echo "$selected_ip"
-        return
-    else
-        echo "$(date) - No more unique IPs available for this iteration." >> ${MAIN_LOGFILE}
-        exit 1
     fi
 }
 
@@ -93,7 +75,7 @@ umount_nfs_exports() {
         echo "$(date) - /mnt is clean" >> ${MAIN_LOGFILE}
     else
         echo "$(date) - /mnt is dirty:" >> ${MAIN_LOGFILE}
-        echo "$NUMDIRS" >> "$HERO_IOPS_OUT"
+        echo "There are $NUMDIRS directories in /mnt" >> ${MAIN_LOGFILE}
         for dir in $NUMDIRS
         do
             echo "Attempting to cleanse $dir" >> ${MAIN_LOGFILE}
@@ -105,38 +87,39 @@ umount_nfs_exports() {
         done
     fi
     echo "Shotgunning stubborn fio procs..." >> ${MAIN_LOGFILE}
-    sudo pkill -9 fio  >> ${MAIN_LOGFILE} 
+    sudo pkill -9 fio  >> ${MAIN_LOGFILE}
+    umount -a -t nfs,nfs4 2>&1 >> ${MAIN_LOGFILE}
+    sudo 'rm -rf /mnt/*'
+    echo "TOTAL NFS EXPORTS NOT UNMOUNTED (should be zero): `mount | grep nfs | wc -l` at `date`" >> ${MAIN_LOGFILE}
 }
 
 mount_nfs_exports() {
     umount_nfs_exports
 
+    available_ips=($(dig +short $CNQ_FQDN | shuf))
+
     local count=0
-    while [ $count -lt $NODE_MOUNT_COUNT ]; do
-        local ip
-        ip=$(get_unique_ip)
+    local ip='127.0.0.1' 
+
+    for ip in "${available_ips[@]}"; do
         echo "$(date) - Using node IP $ip" >> ${MAIN_LOGFILE}
         local MNTPNT
         MNTPNT="/mnt/fio-node-${ip}"
 
         if [ -e "$MNTPNT" ]; then
-            echo "$(date) - Mountpoint directory ${MNTPNT} ALREADY EXISTS." >> ${MAIN_LOGFILE}
-        else
-            echo "$(date) - Creating directory $MNTPNT..." >> ${MAIN_LOGFILE}
-            sudo mkdir -p "$MNTPNT"
-            sudo chown qumulo:qumulo "$MNTPNT"
+            echo "$(date) - Note: Mountpoint directory ${MNTPNT} exists, but why?" >> ${MAIN_LOGFILE}
+            mount | grep nfs  >> ${MAIN_LOGFILE}
         fi
-
+        echo "$(date) - Creating directory $MNTPNT..." >> ${MAIN_LOGFILE}
+        sudo mkdir -p "$MNTPNT"
         echo "$(date) - Mounting NFS export from ${ip} to $MNTPNT..." >> ${MAIN_LOGFILE}
-        sudo mount -t nfs -o tcp,vers=3,nconnect=16 ${ip}:/ $MNTPNT
+        sudo mount -t nfs -o tcp,vers=3,timeo=300,nconnect=16 ${ip}:/ $MNTPNT 2>&1 >> ${MAIN_LOGFILE}
         sudo chown qumulo:qumulo "$MNTPNT"
-        count=$((count + 1))
 
-        if [ $count -eq $NODE_MOUNT_COUNT ]; then
-            break
-        fi
         echo "$count mounts done" >> ${MAIN_LOGFILE}
+        count=$((count + 1))
     done
+    echo "TOTAL NFS MOUNTS this iteration: `mount | grep nfs | wc -l` at `date`" >> ${MAIN_LOGFILE}
 }
 
 create_fio_jobfile() {
@@ -186,6 +169,7 @@ EOF
   kb_base=1000
   numjobs=16
   rw=read
+  # rwmixread=75
   runtime=${FIO_RUNTIME}s
   time_based=1
 
@@ -243,10 +227,11 @@ create_fio_jobfile
 generate_fio_configs
 
 NUM_IOPS_JOBS=$((NODE_MOUNT_COUNT / 2))
-NUM_TPUT_JOBS=$((NODE_MOUNT_COUNT / 2))
+NUM_TPUT_JOBS=$((NODE_MOUNT_COUNT / 2 ))
 
 while true; do
     pids=()
+    echo "Using: file \"${HERO_TPUT_FILE}\", tput log \"${HERO_TPUT_OUT}\", tput num jobs \"${NUM_TPUT_JOBS}\"" >> "$MAIN_LOGFILE"
     # pids+=($(start_fio "$HERO_IOPS_FILE" "$HERO_IOPS_OUT" "$NUM_IOPS_JOBS"))
     pids+=($(start_fio "$HERO_TPUT_FILE" "$HERO_TPUT_OUT" "$NUM_TPUT_JOBS"))
 
@@ -256,6 +241,7 @@ while true; do
 done
 
 exit 0
+
 
 
 

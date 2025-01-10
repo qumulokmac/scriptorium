@@ -3,9 +3,9 @@
 # 
 # Script:   adaptive_load_generator userdata script
 #
-# Date:     November 5th, 2024
+# Date:     November 14th, 2024
 # Author:   KMac kmac@qumulo.com
-# Version:  110824.0920
+# Version:  111524.0903
 #
 ##################################################################################################
 
@@ -25,7 +25,6 @@ run_command() {
     eval "$CMD" >> "$LOG_FILE" 2>&1
     if [ $? -ne 0 ]; then
         log_message "Error: Command failed - $CMD"
-        exit 1
     fi
 }
 
@@ -102,15 +101,8 @@ configure_ntp() {
     run_command "systemctl restart chrony"
 }
 
-create_admin_user() {
-    log_message "Creating admin user $ADMIN_USER"
-    run_command "useradd -m -s /bin/bash $ADMIN_USER"
-    echo 'PS1="\u@$(hostname -f):\w\$ "' >> "/home/$ADMIN_USER/.bashrc"
-    run_command "mkdir -p /home/$ADMIN_USER/.ssh"
-    run_command "cp /home/ubuntu/.ssh/authorized_keys /home/$ADMIN_USER/.ssh/authorized_keys"
-    run_command "chown -R $ADMIN_USER:$ADMIN_USER /home/$ADMIN_USER/.ssh"
-    run_command "chmod 700 /home/$ADMIN_USER/.ssh"
-    run_command "chmod 600 /home/$ADMIN_USER/.ssh/authorized_keys"
+set_admin_user() {
+    log_message "Setting admin user $ADMIN_USER"
     echo "$ADMIN_USER ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/$ADMIN_USER"
 }
 
@@ -120,6 +112,7 @@ update_and_install_packages() {
     run_command "apt -y upgrade"
     run_command "apt -y install fio make gcc automake autoconf libtool m4 selinux-utils gpg manpages-dev binutils coreutils curl jq wget git gzip lsof nfs-common pssh screen strace tcpdump unzip util-linux vim build-essential libssl-dev libffi-dev software-properties-common net-tools python3-apt iperf3"
     run_command "apt -y autoremove"
+    run_command "apt -y remove walinuxagent" 
 }
 
 update_sysctl_settings() {
@@ -143,17 +136,11 @@ _EOF_
     log_message "Sysctl settings updated"
 }
 
-install_aws_cli() {
-    log_message "Installing AWS CLI"
-    cd /tmp
-    run_command "curl -s 'https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip' -o 'awscliv2.zip'"
-    run_command "apt-get install -y unzip"
-    run_command "unzip -q awscliv2.zip"
-    run_command "./aws/install"
-    export PATH=$PATH:/usr/local/bin
-    echo 'export PATH=$PATH:/usr/local/bin' >> /etc/profile
-    run_command "aws --version"
-    cd -
+install_azure_cli() {
+    log_message "Installing Azure CLI"
+    run_command "curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash"
+    export PATH=$PATH:/usr/bin
+    echo 'export PATH=$PATH:/usr/bin' >> /etc/profile
 }
 
 reboot_system() {
@@ -161,56 +148,11 @@ reboot_system() {
     run_command "reboot"
 }
 
-enable_jumbo_frames() {
-    log_message "Starting enable_jumbo_frames"
-    INTERFACE=$(ip -o -4 route show to default | awk '{print $5}')
-    if [ -n "$INTERFACE" ]; then
-        ip link set dev $INTERFACE mtu 9000 || true
-    else
-        log_message "No default interface found, unable to set MTU"
-    fi
-    log_message "Completed enable_jumbo_frames"
-}
-
 copy_tools() {
     log_message "Copying tools from S3. Be sure to have updated the pre-signed URL"
-    run_command "curl -o /home/${ADMIN_USER}/alg_suite.tgz 'https://bucket-of-bytes.s3.us-east-1.amazonaws.com/scripts/alg_suite.tgz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAU2VJCYGYN7NUXMXI%2F20241127%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20241127T002809Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=b4da2d08e614ef4e36bb97306eec3ee4734b2cd15eea07251e7e324109927e98'"
-    run_command "tar --exclude='.ssh' --no-xattrs -xf /home/${ADMIN_USER}/alg_suite.tgz -C /home/qumulo"
-}
-
-configure_workers() {
-    log_message "Configuring workers.conf"
-    /usr/local/bin/aws ec2 describe-instances --filters "Name=tag:Name,Values=*ubuntu*" --query "Reservations[].Instances[].PrivateIpAddress" --output text | tr '\t' '\n' > /home/qumulo/workers.conf
-    # The nodes.conf will only be populated if CNQ has already been deployed. 
-    /usr/local/bin/aws ec2 describe-instances --filters "Name=tag:Name,Values=*node*" --query "Reservations[].Instances[].PrivateIpAddress" --output text | tr '\t' '\n' > /home/qumulo/nodes.conf
-    # head -1 /home/qumulo/workers.conf > /home/qumulo/workers-1.conf
-    # head -4 /home/qumulo/workers.conf > /home/qumulo/workers-4.conf
-    chown -R qumulo:qumulo /home/qumulo
-
-    TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
-    INSTANCE_ID=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
-    REGION=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
-    NAME_TAG=$(aws ec2 describe-tags --filters "Name=resource-id,Values=${INSTANCE_ID}" "Name=key,Values=Name" --region ${REGION} --query "Tags[0].Value" --output text)
-
-    log_message "INSTANCE_ID is $INSTANCE_ID, REGION is $REGION, NAME_TAG is $NAME_TAG"
-    echo "export NAME_TAG=\"${NAME_TAG}\"" >> "/home/$ADMIN_USER/.bashrc"
-    echo "export PS1='[\u@\W] \${NAME_TAG} \$ '" >> "/home/$ADMIN_USER/.bashrc"
-    echo 'PATH=$PATH:/home/qumulo/tools:.' >> "/home/$ADMIN_USER/.bashrc"
-    chmod 0600 "/home/$ADMIN_USER/.bashrc"
-    chown ${ADMIN_USER}:${ADMIN_USER} "/home/$ADMIN_USER/.bashrc"
-
-    for host in $(cat /home/qumulo/workers.conf); do
-        ssh-keyscan $host >> "/home/$ADMIN_USER/.ssh/known_hosts" 2>/dev/null
-    done
-    chmod 0600 "/home/$ADMIN_USER/.bashrc" "/home/$ADMIN_USER/.ssh/known_hosts" 
-    chown -R qumulo:qumulo "/home/$ADMIN_USER/"
-
-    log_message "Removing apparmor..."
-
-    systemctl stop apparmor.service 
-    systemctl disable apparmor.service 
-    apt -y remove apparmor
-
+    run_command "curl -o /home/${ADMIN_USER}/azure_alg_suite.tgz 'https://bucket-of-bytes.s3.us-east-1.amazonaws.com/scripts/azure_alg_suite.tgz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAU2VJCYGYN7NUXMXI%2F20241118%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20241118T022350Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=88168a37561dcb1175f8e5ded57e373b9ef0d37cee7b228915d47837bab6ac82'"
+    run_command "tar --warning=no-unknown-keyword -xvf /home/${ADMIN_USER}/azure_alg_suite.tgz -C /home/qumulo ./adaptive_load_generator.sh ./start_load.sh ./tools"
+    run_command "chown -R ${ADMIN_USER} /home/${ADMIN_USER}"
 }
 
 set_sshdconfig() {
@@ -220,62 +162,18 @@ set_sshdconfig() {
     log_message "Completed set_sshdconfig"
 }
 
-configure_ena_express() {
-    log_message "Starting configure_ena_express"
-
-    INTERFACE=$(basename `ls -1d /sys/class/net/e*`)
-    echo "NIC set to $INTERFACE"
-
-    echo "Setting MTU to 8900"
-    ip link set $INTERFACE mtu 8900
-
-    echo "Setting the RX size to 8192"
-    /usr/sbin/ethtool -G $INTERFACE rx 8192
-
-    echo "Setting the TX Queue size to max on all queues"
-    for txq in `ls -1d /sys/class/net/$INTERFACE/queues/tx-*`
-    do
-        echo max > $txq/byte_queue_limits/limit_min
-    done
-
-    echo "Loading the ENA module"
-    /usr/sbin/modprobe ena
-    echo 'ena' >> /etc/modules
-
-    echo "Updating Grub"
-    echo 'GRUB_CMDLINE_LINUX="net.ifnames=0 biosdevname=0"' >> /etc/default/grub
-    /usr/sbin/update-grub
-
-    cat << EOF > /etc/sysctl.d/99-ena-tcp-tuning.conf
-net.core.rmem_max = 16777216
-net.core.wmem_max = 16777216
-net.ipv4.tcp_rmem = 4096 87380 16777216
-net.ipv4.tcp_wmem = 4096 65536 16777216
-net.ipv4.tcp_window_scaling = 1
-net.ipv4.tcp_timestamps = 1
-net.ipv4.tcp_sack = 1
-net.ipv4.tcp_no_metrics_save = 1
-net.ipv4.tcp_moderate_rcvbuf = 1
-
-EOF
-
-}
-
 main() {
     log_message "Starting main script"
     disable_selinux
     remove_security_tools
-    enable_jumbo_frames
-    configure_ena_express
     disable_ipv6
     configure_ntp
-    create_admin_user
+    set_admin_user
     update_and_install_packages
-    install_aws_cli
+    install_azure_cli
     update_sysctl_settings
     update_limits_conf
     copy_tools
-    configure_workers
     reboot_system
 }
 

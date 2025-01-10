@@ -1,24 +1,33 @@
 #!/bin/bash
 ################################################################################
 # Script: check_nodes_network.sh
-# Purpose: Checks the network status of IP addresses listed in nodes.conf.
+# Purpose: Checks the network status of IP addresses obtained from a DNS query
+#          of cnq.qumulo.net.
 # Usage: ./check_nodes_network.sh
 # Author: KMac | kmac@qumulo.com
-# Date:   November 6, 2024
+# Date:   November 15, 2024
 ################################################################################
 
-input_file="/home/qumulo/nodes.conf"
+# Retrieve IP addresses from a DNS query
+dns_query="cnq.speedtest.world"
+ips=($(dig +short "$dns_query"))
+
+if [[ ${#ips[@]} -eq 0 ]]; then
+    echo -e "\033[31mError: No IP addresses found for $dns_query.\033[0m"
+    exit 1
+fi
+
 reachable=()
 unreachable=()
 
-# Loop through each IP in the file and ping it
-while IFS= read -r ip; do
+# Loop through each IP obtained from the DNS query and ping it
+for ip in "${ips[@]}"; do
     if ping -c 1 -W 1 "$ip" &> /dev/null; then
         reachable+=("$ip")
     else
         unreachable+=("$ip")
     fi
-done < "$input_file"
+done
 
 # Print the report
 echo -e "\nNetwork Status Report"

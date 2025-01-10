@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-WORKERS_CONF="/home/qumulo/workers.conf"
+WORKERS_CONF="/home/qumulo/conf/workers.conf"
 
 command_exists() {
     command -v "$1" >/dev/null 2>&1
