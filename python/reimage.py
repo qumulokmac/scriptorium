@@ -30,9 +30,9 @@ import time
 requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
 
 ILO_IP_FILE = "ilo_ips.txt"
-USERNAME = "hpadmin"
-PASSWORD = "atlpresales"
-ISO_URL = "http://10.10.66.121/usb_factory_reset.iso"
+USERNAME = "YOURUSERNAME"
+PASSWORD = "YOURPASSWORD
+ISO_URL = "http://YOURIPADDR/usb_factory_reset.iso"
 
 def create_redfish_session(host, username, password):
     login_url = f"https://{host}/redfish/v1/SessionService/Sessions"
@@ -42,7 +42,7 @@ def create_redfish_session(host, username, password):
     }
 
     print(f"[*] Establishing session with iLO at {host}...")
-    response = requests.post(login_url, json=login_payload, verify=False)
+    response = requests.post(login_url, json=login_payload, verify=True)
 
     if response.status_code == 201:
         session_token = response.headers['X-Auth-Token']
@@ -64,7 +64,7 @@ def reset_ilo(host, session_token):
     }
 
     print(f"[*] Resetting iLO for host {host}...")
-    response = requests.post(reset_url, headers=headers, json=reset_payload, verify=False)
+    response = requests.post(reset_url, headers=headers, json=reset_payload, verify=True)
 
     if response.status_code == 200:
         print("[+] iLO reset successfully. Waiting for iLO to reboot...")
@@ -80,7 +80,7 @@ def fetch_system_info(host, session_token):
     }
 
     print("[*] Fetching system information...")
-    response = requests.get(system_url, headers=headers, verify=False)
+    response = requests.get(system_url, headers=headers, verify=True)
 
     if response.status_code == 200:
         print("[+] System information fetched successfully.")
@@ -103,7 +103,7 @@ def power_down_system(host, session_token):
     system_info = fetch_system_info(host, session_token)
     if system_info and system_info.get('PowerState') == 'On':
         print("[*] Powering down the server...")
-        response = requests.post(power_url, headers=headers, json=power_payload, verify=False)
+        response = requests.post(power_url, headers=headers, json=power_payload, verify=True)
         if response.status_code == 200:
             print("[+] Server powered down successfully.")
         else:
@@ -128,7 +128,7 @@ def set_boot_order_to_cdrom(host, session_token):
     }
 
     print("[*] Setting CD-ROM as the one-time boot device for the next boot...")
-    response = requests.patch(boot_url, headers=headers, json=boot_payload, verify=False)
+    response = requests.patch(boot_url, headers=headers, json=boot_payload, verify=True)
 
     if response.status_code == 200 or response.status_code == 202:
         print("[+] One-time boot set to CD-ROM for the next boot.")
@@ -146,7 +146,7 @@ def check_virtual_media_status(host, session_token):
     }
 
     print("[*] Checking existing virtual media connections...")
-    response = requests.get(media_url, headers=headers, verify=False)
+    response = requests.get(media_url, headers=headers, verify=True)
 
     if response.status_code == 200:
         media_info = response.json()
@@ -168,7 +168,7 @@ def unmount_virtual_media(host, session_token):
     }
 
     print("[*] Unmounting current virtual media...")
-    response = requests.patch(media_url, headers=headers, json=unmount_payload, verify=False)
+    response = requests.patch(media_url, headers=headers, json=unmount_payload, verify=True)
 
     if response.status_code == 200:
         print("[+] Virtual media unmounted successfully.")
@@ -188,7 +188,7 @@ def eject_virtual_media(host, session_token):
     }
 
     print("[*] Ejecting currently inserted virtual media...")
-    response = requests.patch(media_url, headers=headers, json=eject_payload, verify=False)
+    response = requests.patch(media_url, headers=headers, json=eject_payload, verify=True)
 
     if response.status_code == 200:
         print("[+] Virtual media ejected successfully.")
@@ -210,7 +210,7 @@ def insert_virtual_media(host, session_token, iso_url):
     }
 
     print(f"[*] Inserting virtual media from {iso_url} to CD-ROM...")
-    response = requests.patch(media_url, headers=headers, json=media_payload, verify=False)
+    response = requests.patch(media_url, headers=headers, json=media_payload, verify=True)
 
     if response.status_code == 200:
         print("[+] Virtual media inserted successfully on CD-ROM.")
@@ -230,7 +230,7 @@ def power_on_system(host, session_token):
     system_info = fetch_system_info(host, session_token)
     if system_info and system_info.get('PowerState') == 'Off':
         print("[*] Powering on the server...")
-        response = requests.post(power_url, headers=headers, json=power_payload, verify=False)
+        response = requests.post(power_url, headers=headers, json=power_payload, verify=True)
         if response.status_code == 200:
             print("[+] Server powered on successfully.")
         else:
@@ -246,7 +246,7 @@ def delete_redfish_session(session_url, session_token):
     }
 
     print("[*] Deleting session...")
-    response = requests.delete(session_url, headers=headers, verify=False)
+    response = requests.delete(session_url, headers=headers, verify=True)
 
     if response.status_code in [200, 204]:
         print("[+] Session deleted successfully.")

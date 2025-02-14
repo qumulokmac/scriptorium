@@ -174,7 +174,7 @@ enable_jumbo_frames() {
 
 copy_tools() {
     log_message "Copying tools from S3. Be sure to have updated the pre-signed URL"
-    run_command "curl -o /home/${ADMIN_USER}/alg_suite.tgz 'https://bucket-of-bytes.s3.us-east-1.amazonaws.com/scripts/alg_suite.tgz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAU2VJCYGYN7NUXMXI%2F20241127%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20241127T002809Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=b4da2d08e614ef4e36bb97306eec3ee4734b2cd15eea07251e7e324109927e98'"
+    run_command "curl -o /home/${ADMIN_USER}/alg_suite.tgz 'https://bucket-of-bytes.s3.us-east-1.amazonaws.com/scripts/alg_suite.tgz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=YOUR_AWS_ACCESS_KEY_ID%2F20241127%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20241127T002809Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=b4da2d08e614ef4e36bb97306eec3ee4734b2cd15eea07251e7e324109927e98'"
     run_command "tar --exclude='.ssh' --no-xattrs -xf /home/${ADMIN_USER}/alg_suite.tgz -C /home/qumulo"
 }
 

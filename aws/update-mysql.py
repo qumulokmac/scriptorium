@@ -7,7 +7,7 @@ from csv import reader
 from datetime import date
 
 RDS = pymysql.connect(host='dbcluster-1.cluster-c6xoyndmnisp.us-east-1.rds.amazonaws.com', user='admin', password='
-kmacadmin42!', database='OCTANKDB', cursorclass=pymysql.cursors.DictCursor)
+yourpasswordhere', database='YOURDB', cursorclass=pymysql.cursors.DictCursor)
 cursor= RDS.cursor()
 IMPORTFILE='transcription-mock.csv'
 

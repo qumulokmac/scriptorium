@@ -150,7 +150,7 @@ reboot_system() {
 
 copy_tools() {
     log_message "Copying tools from S3. Be sure to have updated the pre-signed URL"
-    run_command "curl -o /home/${ADMIN_USER}/azure_alg_suite.tgz 'https://bucket-of-bytes.s3.us-east-1.amazonaws.com/scripts/azure_alg_suite.tgz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAU2VJCYGYN7NUXMXI%2F20241118%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20241118T022350Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=88168a37561dcb1175f8e5ded57e373b9ef0d37cee7b228915d47837bab6ac82'"
+    run_command "curl -o /home/${ADMIN_USER}/azure_alg_suite.tgz 'https://bucket-of-bytes.s3.us-east-1.amazonaws.com/scripts/azure_alg_suite.tgz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=YOUR_AWS_ACCESS_KEY_ID%2F20241118%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20241118T022350Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=88168a37561dcb1175f8e5ded57e373b9ef0d37cee7b228915d47837bab6ac82'"
     run_command "tar --warning=no-unknown-keyword -xvf /home/${ADMIN_USER}/azure_alg_suite.tgz -C /home/qumulo ./adaptive_load_generator.sh ./start_load.sh ./tools"
     run_command "chown -R ${ADMIN_USER} /home/${ADMIN_USER}"
 }
