@@ -18,7 +18,7 @@ fi
 SOURCE_MP4_FILE="$1"
 OUTPUT_ISO_FILE="$2"
 DMG_FILE="${OUTPUT_ISO_FILE%.iso}.dmg"
-
+DMG_BUFFER_PERCENTAGE=15
 FILENAME=$(basename "$SOURCE_MP4_FILE")
 VOLUME_NAME=$(echo "$FILENAME" | grep -oE '^[[:alnum:]]+')
 
@@ -36,8 +36,11 @@ if [[ ! -f "$SOURCE_MP4_FILE" ]]; then
     exit 1
 fi
 
-print_step 1 "Creating a Disk Image (DMG) of size 2GB..."
-hdiutil create -size 2g -fs HFS+ -volname "$VOLUME_NAME" "$DMG_FILE" || { echo "Failed to create DMG"; exit 1; }
+MP4_SIZE_MIB=$(du -m "${SOURCE_MP4_FILE}" | cut -f1)
+DMG_SIZE_GIB=$(awk "BEGIN {printf \"%.2f\", (${MP4_SIZE_MIB} * (1 + ${DMG_BUFFER_PERCENTAGE} / 100)) / 1024}")
+
+print_step 1 "Creating a Disk Image (DMG). ${SOURCE_MP4_FILE} is ${MP4_SIZE_MIB}MiB.\nAdding a ${DMG_BUFFER_PERCENTAGE}% buffer, the DMG size will be ${DMG_SIZE_GIB} GiB." 
+hdiutil create -size ${DMG_SIZE_GIB}g -fs HFS+ -volname "$VOLUME_NAME" "$DMG_FILE" || { echo "Failed to create DMG"; exit 1; }
 
 print_step 2 "Mounting the Disk Image..."
 MOUNT_POINT=$(hdiutil attach "$DMG_FILE" | grep "Volumes" | awk '{print $3}')
